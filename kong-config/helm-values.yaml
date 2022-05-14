@@ -1,0 +1,44 @@
+
+# Custom values for database less and declartative configuration Kong's Helm Chart.
+# Please refer to https://github.com/Kong/charts/blob/main/charts/kong/values.yaml for exhaustive set of configuration options.
+
+# -----------------------------------------------------------------------------
+# Deployment parameters
+# -----------------------------------------------------------------------------
+
+image:
+  repository: kong
+  tag: "2.8"
+
+dblessConfig:
+  configMap: kong-declarative-config
+
+plugins:  # adds phantom token plugin to the gateway
+   configMaps:
+    - pluginName: phantom-token
+      name: phantom-token
+
+admin:   # set enabled to true for creating a Kubernetes service for the admin API
+  enabled: true
+  type: ClusterIP
+
+proxy: # set enabled to true for creating a Kubernetes service for the proxy API
+  enabled: true
+  type: ClusterIP
+
+ingressController:
+  enabled: false
+  installCRDs: false
+
+env:
+  database: "off"
+  nginx_worker_processes: "2"
+  proxy_access_log: /dev/stdout
+  admin_access_log: /dev/stdout
+  admin_gui_access_log: /dev/stdout
+  portal_api_access_log: /dev/stdout
+  proxy_error_log: /dev/stderr
+  admin_error_log: /dev/stderr
+  admin_gui_error_log: /dev/stderr
+  portal_api_error_log: /dev/stderr
+  prefix: /kong_prefix/

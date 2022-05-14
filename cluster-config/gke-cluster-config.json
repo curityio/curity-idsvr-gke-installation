@@ -1,0 +1,80 @@
+{
+  "gke-cluster-config": [
+    {
+      "Name": "cluster_name",
+      "Value": "curity-demo",
+      "Description": "Name of the GKE k8s cluster"
+    },
+    {
+      "Name": "cluster_version",
+      "Value": "latest",
+      "Description": "Version of the k8s cluster"
+    },
+    {
+      "Name": "region",
+      "Value": "europe-west1",
+      "Description": "GCP Region to deploy the k8s cluster"
+    },
+    {
+      "Name": "worker_nodes_machine_type",
+      "Value": "e2-medium",
+      "Description": "worker nodes instance type"
+    },
+    {
+      "Name": "worker_nodes_disk_size_in_gigabytes",
+      "Value": "30",
+      "Description": "persistent disk storage for the worker nodes"
+    },
+    {
+      "Name": "worker_nodes_zones",
+      "Value": "europe-west1-b,europe-west1-c",
+      "Description": "Specifies the zones where the nodes would be provisioned"
+    },
+    {
+      "Name": "number_of_nodes_in_each_zone",
+      "Value": "1",
+      "Description": "number of nodes provisioned in each zone"
+    }
+  ],
+  "idsvr-config": [
+    {
+      "Name": "admin_hostname",
+      "Value": "admin.example.gke",
+      "Description": "Admin service FQDN"
+    },
+    {
+      "Name": "runtime_hostname",
+      "Value": "login.example.gke",
+      "Description": "Runtime service FQDN"
+    },
+    {
+      "Name": "idsvr_admin_password",
+      "Value": "Password123",
+      "Description": "password for curity identity server admin console"
+    },
+    {
+      "Name": "idsvr_namespace",
+      "Value": "curity",
+      "Description": "Name of the k8s namespace to deploy curity identity server"
+    },
+    {
+      "Name": "logging_level",
+      "Value": "DEBUG",
+      "Description": "Logging Level for admin and runtime services"
+    }
+  ],
+  "kong-config": [
+    {
+      "Name": "kong_namespace",
+      "Value": "kong",
+      "Description": "Name of the k8s namespace to deploy kong gateway"
+    }    
+  ],
+  "simple-api-config": [
+    {
+      "Name": "api_namespace",
+      "Value": "api",
+      "Description": "Name of the k8s namespace to deploy simple sample api"
+    }    
+  ]
+}

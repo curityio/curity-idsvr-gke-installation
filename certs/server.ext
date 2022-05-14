@@ -1,0 +1,1 @@
+subjectAltName=DNS:example.gke,DNS:admin.example.gke,DNS:login.example.gke,DNS:kong-admin.example.gke,DNS:api.example.gke
