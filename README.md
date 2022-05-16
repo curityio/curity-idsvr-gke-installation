@@ -27,7 +27,7 @@ If needed, you can also get a free community edition license from the [Curity De
 
 All of the services are running privately in the kubernetes cluster and exposed via a https load balancer.
 
-![deployment pattern](./docs/deployment.png "deployment pattern")
+![deployment pattern](./docs/deployment.svg "deployment pattern")
 
 ## Installation
 
