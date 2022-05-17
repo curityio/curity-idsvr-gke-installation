@@ -71,7 +71,7 @@ create_vpc_network() {
   gcloud compute networks subnets create curity-subnet --network curity-network --region "${region}" --range 192.168.1.0/24
   gcloud compute routers create curity-nat-router --network curity-network --region "${region}"
   gcloud compute routers nats create nat-config --router-region "${region}" --router curity-nat-router --nat-all-subnet-ip-ranges --auto-allocate-nat-external-ips
-  gcloud compute firewall-rules create curtity-ingress-webhook --description="Allow ingress validation web-hook calls" --direction=INGRESS --priority=1000 --network=curity-network --action=ALLOW --rules=tcp:8443 --source-ranges=172.16.0.32/28
+  gcloud compute firewall-rules create curity-ingress-webhook --description="Allow ingress validation web-hook calls" --direction=INGRESS --priority=1000 --network=curity-network --action=ALLOW --rules=tcp:8443 --source-ranges=172.16.0.32/28
   echo -e "VPC Network configuration is completed ... \n"
 }
 
@@ -195,7 +195,7 @@ delete_vpc_network() {
   echo -e "\n"
   gcloud compute networks subnets delete curity-subnet --region "${region}"
   gcloud compute routers delete curity-nat-router --region="${region}"
-  gcloud compute firewall-rules delete curtity-ingress-webhook
+  gcloud compute firewall-rules delete curity-ingress-webhook
   gcloud compute networks delete curity-network
   echo "Clean up completed .."
 }
