@@ -7,16 +7,12 @@
 # -----------------------------------------------------------------------------
 
 image:
-  repository: kong
-  tag: "2.8"
+  repository: curity/kong-custom
+  tag: "2.8.1-alpine"
 
 dblessConfig:
   configMap: kong-declarative-config
 
-plugins:  # adds phantom token plugin to the gateway
-   configMaps:
-    - pluginName: phantom-token
-      name: phantom-token
 
 admin:   # set enabled to true for creating a Kubernetes service for the admin API
   enabled: true
@@ -32,13 +28,4 @@ ingressController:
 
 env:
   database: "off"
-  nginx_worker_processes: "2"
-  proxy_access_log: /dev/stdout
-  admin_access_log: /dev/stdout
-  admin_gui_access_log: /dev/stdout
-  portal_api_access_log: /dev/stdout
-  proxy_error_log: /dev/stderr
-  admin_error_log: /dev/stderr
-  admin_gui_error_log: /dev/stderr
-  portal_api_error_log: /dev/stderr
-  prefix: /kong_prefix/
+  plugins: 'bundled,phantom-token'

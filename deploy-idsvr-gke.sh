@@ -159,8 +159,7 @@ deploy_kong_gateway() {
   helm install kong  kong/kong --values kong-config/helm-values.yaml --namespace "${kong_namespace}" --create-namespace
   
   kubectl -n "${kong_namespace}" create cm kong-declarative-config --from-file=kong-config/kong.yml
-  kubectl -n "${kong_namespace}" create cm phantom-token --from-file=kong-config/plugins/phantom-token 
-
+  
   # create secrets for TLS termination, ingress setup
   kubectl create secret tls example-gke-tls --cert=certs/example.gke.ssl.pem --key=certs/example.gke.ssl.key -n "$kong_namespace"
 
