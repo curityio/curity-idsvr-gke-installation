@@ -170,6 +170,7 @@ deploy_ingress_controller_and_sample_api() {
 
 }
 
+
 deploy_kong_ingress_controller() {
   echo -e "Deploying kong ingress controller & adding phantom token plugin in the k8s cluster ...\n"
   helm repo add kong https://charts.konghq.com

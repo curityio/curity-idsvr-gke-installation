@@ -32,4 +32,3 @@ env:
   database: "off"
   LOG_LEVEL: "error"
   plugins: 'bundled,phantom-token' 
- 
