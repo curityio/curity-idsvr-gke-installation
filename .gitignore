@@ -1,0 +1,4 @@
+certs/example.*
+idsvr-config/license.json
+idsvr-config/templates
+.DS_Store

@@ -3,11 +3,9 @@
 [![Quality](https://img.shields.io/badge/quality-experiment-red)](https://curity.io/resources/code-examples/status/)
 [![Availability](https://img.shields.io/badge/availability-source-blue)](https://curity.io/resources/code-examples/status/)
 
-A demo installation of Curity Identity Server and Kong gateway including phantom token plugin in Google Kubernetes Engine for PoC purposes.
+A demo installation of Curity Identity Server and the Phantom Token Pattern in Kubernetes using Kong Ingress controller or Nginx Ingress controller, via the Google Cloud Platform. This will ensure that opaque access tokens are issued to internet clients, while APIs receive JWT access tokens.
 
-This tutorial will enable any developer or an architect to quickly run the Curity Identity Server and the Phantom Token Pattern in Kubernetes, via the Google Cloud Platform. This will ensure that opaque access tokens are issued to internet clients, while APIs receive JWT access tokens.
-
-This tutorial could be completed by using the Google Cloud Platform free tier option without incurring any cost.
+This tutorial could be completed by using the Google Cloud Platform free tier option without incurring any cost
 
 ## Prepare the Installation
 
@@ -81,8 +79,6 @@ All of the services are running privately in the kubernetes cluster and exposed 
 | --------------------|:------------------------------------------------------------- | ----------------------------------------------------------------|
 | ADMIN UI            | https://admin.example.gke/admin                                | Curity Administration console                                   |
 | OIDC METADATA       | https://login.example.gke/~/.well-known/openid-configuration   | OIDC metadata discovery ednpoint                                |
-| KONG ADMIN ENDPOINT | https://kong-admin.example.gke                                 | RESTful Admin API for administration & configuration purposes. Kong is configured in DBLess mode & using declarative config, so the admin api is mostly read-only.  |
-| KONG PROXY ENDPOINT | https://api.example.gke                                 | Kong Proxy URL                                                  |
 | API  PROXY ENDPOINT | https://api.example.gke/echo                            | Upstream API proxy endpoint                                     |
 
 

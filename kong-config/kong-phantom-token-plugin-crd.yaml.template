@@ -1,0 +1,11 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: phantom-token
+config:
+  introspection_endpoint: http://curity-idsvr-runtime-svc.$idsvr_namespace.svc.cluster.local:8443/oauth/v2/oauth-introspect # k8s cluster internal URL
+  client_id: api-gateway-client
+  client_secret: Password123
+  token_cache_seconds: 900
+  scope: read
+plugin: phantom-token
