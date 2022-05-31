@@ -3,9 +3,11 @@
 [![Quality](https://img.shields.io/badge/quality-experiment-red)](https://curity.io/resources/code-examples/status/)
 [![Availability](https://img.shields.io/badge/availability-source-blue)](https://curity.io/resources/code-examples/status/)
 
-A demo installation of Curity Identity Server and the Phantom Token Pattern in Kubernetes using Kong Ingress controller or Nginx Ingress controller, via the Google Cloud Platform. This will ensure that opaque access tokens are issued to internet clients, while APIs receive JWT access tokens.
+This tutorial will enable any developer or an architect to quickly run the Curity Identity Server and the Phantom Token Pattern in Kubernetes using Kong Ingress controller or Nginx Ingress controller, via the Google Cloud Platform.
 
-This tutorial could be completed by using the Google Cloud Platform free tier option without incurring any cost
+This installation follows the security best practice to host the Identity server and the APIs behind an Ingress controller acting as an Reverse proxy/API gateway. This will ensure that opaque access tokens are issued to internet clients, while APIs receive JWT access tokens.
+
+This tutorial could be completed by using the Google Cloud Platform free tier option without incurring any cost.
 
 ## Prepare the Installation
 
@@ -25,7 +27,7 @@ If needed, you can also get a free community edition license from the [Curity De
 
 All of the services are running privately in the kubernetes cluster and exposed via a https load balancer.
 
-![deployment pattern](./docs/deployment.svg "deployment pattern")
+![deployment pattern](./docs/deployment_IC.png "deployment pattern")
 
 ## Installation
 
@@ -82,7 +84,7 @@ All of the services are running privately in the kubernetes cluster and exposed 
 | API  PROXY ENDPOINT | https://api.example.gke/echo                            | Upstream API proxy endpoint                                     |
 
 
-For a detailed step by step installation instructions, please refer to [Installing the Curity Identity Server with Kong API Gateway on GKE](https://curity.io/resources/learn/kubernetes-gke-idsvr-kong-phantom) article.
+For a detailed step by step installation instructions, please refer to [Installing the Curity Identity Server with Kong/Nginx on GKE](https://curity.io/resources/learn/kubernetes-gke-idsvr-kong-phantom) article.
 
 
 ## More Information
