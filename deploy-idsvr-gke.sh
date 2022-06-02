@@ -23,7 +23,7 @@ greeting_message() {
   echo "| [1] GKE PRIVATE KUBERNETES CLUSTER                                         |"
   echo "| [2] CURITY IDENTITY SERVER ADMIN NODE                                      |"
   echo "| [3] CURITY IDENTITY SERVER RUNTIME NODE                                    |"
-  echo "| [4] KONG INGRESS CONTROLLER OR NGINX INGRESS CONTROLLER                   |"
+  echo "| [4] KONG INGRESS CONTROLLER OR NGINX INGRESS CONTROLLER                    |"
   echo "| [5] GCP HTTPS LOAD BALANCER                                                |"
   echo "| [6] PHANTOM TOKEN PLUGIN                                                   |"
   echo "| [7] SIMPLE NODEJS API                                                      |"
@@ -34,7 +34,7 @@ greeting_message() {
 
 pre_requisites_check() {
   # Check if gcloud, kubectl, helm & jq are installed
-  if ! [[ $(gcloud --version) && $(helm version) && $(jq --version) && $(kubectl version ) ]]; then
+  if ! [[ $(gcloud --version) && $(helm version) && $(jq --version) && $(kubectl version) ]]; then
       echo "Please install gcloud, kubectl, helm & jq to continue with the deployment .."
       exit 1 
   fi

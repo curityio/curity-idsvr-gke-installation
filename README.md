@@ -39,13 +39,17 @@ All of the services are running privately in the kubernetes cluster and exposed 
 
  2. Configuration
  
-    Cluster options could be configured by modifying `cluster-config/gke-cluster-config.json` file.
+   Cluster options could be configured by modifying `cluster-config/gke-cluster-config.json` file.
 
 
  3. Install the environment  
      ```sh
     ./deploy-idsvr-gke.sh --install
     ```   
+
+   ![Ingress Controller Choice](./docs/IngressController-choice.png "Ingress Controller Choice")
+   
+   The installation script prompts for input choices, and one of the choices is which Ingress controller to deploy. Once selected, the ingress controller is deployed with a customized docker image containing the required plugins.
 
 
  4. Shutdown environment  
@@ -70,7 +74,8 @@ All of the services are running privately in the kubernetes cluster and exposed 
     ```sh
      kubectl -n curity logs -f -l role=curity-idsvr-runtime
      kubectl -n curity logs -f -l role=curity-idsvr-admin  
-     kubectl -n kong   logs -f -l app.kubernetes.io/name=kong
+     kubectl -n ingress-nginx logs -f -l app.kubernetes.io/component=controller
+     kubectl -n kong logs -f -l app.kubernetes.io/component=controller
      kubectl -n api    logs -f -l app=simple-echo-api
     ```
 
