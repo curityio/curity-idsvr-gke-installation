@@ -3,9 +3,9 @@
 [![Quality](https://img.shields.io/badge/quality-experiment-red)](https://curity.io/resources/code-examples/status/)
 [![Availability](https://img.shields.io/badge/availability-source-blue)](https://curity.io/resources/code-examples/status/)
 
-A demo installation of Curity Identity Server and Kong gateway including phantom token plugin in Google Kubernetes Engine for PoC purposes.
+This tutorial will enable any developer or an architect to quickly run the Curity Identity Server and the Phantom Token Pattern in Kubernetes using Kong Ingress controller or Nginx Ingress controller, via the Google Cloud Platform.
 
-This tutorial will enable any developer or an architect to quickly run the Curity Identity Server and the Phantom Token Pattern in Kubernetes, via the Google Cloud Platform. This will ensure that opaque access tokens are issued to internet clients, while APIs receive JWT access tokens.
+This installation follows the security best practice to host the Identity server and the APIs behind an Ingress controller acting as an Reverse proxy/API gateway. This will ensure that opaque access tokens are issued to internet clients, while APIs receive JWT access tokens.
 
 This tutorial could be completed by using the Google Cloud Platform free tier option without incurring any cost.
 
@@ -27,7 +27,7 @@ If needed, you can also get a free community edition license from the [Curity De
 
 All of the services are running privately in the kubernetes cluster and exposed via a https load balancer.
 
-![deployment pattern](./docs/deployment.svg "deployment pattern")
+![deployment pattern](./docs/deployment_IC.png "deployment pattern")
 
 ## Installation
 
@@ -46,6 +46,8 @@ All of the services are running privately in the kubernetes cluster and exposed 
      ```sh
     ./deploy-idsvr-gke.sh --install
     ```   
+
+    The installation script prompts for input choices, and one of the choices is which Ingress controller to deploy. Once selected, the ingress controller is deployed with a customized docker image containing the required plugins.
 
 
  4. Shutdown environment  
@@ -70,7 +72,8 @@ All of the services are running privately in the kubernetes cluster and exposed 
     ```sh
      kubectl -n curity logs -f -l role=curity-idsvr-runtime
      kubectl -n curity logs -f -l role=curity-idsvr-admin  
-     kubectl -n kong   logs -f -l app.kubernetes.io/name=kong
+     kubectl -n ingress-nginx logs -f -l app.kubernetes.io/component=controller
+     kubectl -n kong logs -f -l app.kubernetes.io/component=controller
      kubectl -n api    logs -f -l app=simple-echo-api
     ```
 
@@ -81,12 +84,10 @@ All of the services are running privately in the kubernetes cluster and exposed 
 | --------------------|:------------------------------------------------------------- | ----------------------------------------------------------------|
 | ADMIN UI            | https://admin.example.gke/admin                                | Curity Administration console                                   |
 | OIDC METADATA       | https://login.example.gke/~/.well-known/openid-configuration   | OIDC metadata discovery ednpoint                                |
-| KONG ADMIN ENDPOINT | https://kong-admin.example.gke                                 | RESTful Admin API for administration & configuration purposes. Kong is configured in DBLess mode & using declarative config, so the admin api is mostly read-only.  |
-| KONG PROXY ENDPOINT | https://api.example.gke                                 | Kong Proxy URL                                                  |
 | API  PROXY ENDPOINT | https://api.example.gke/echo                            | Upstream API proxy endpoint                                     |
 
 
-For a detailed step by step installation instructions, please refer to [Installing the Curity Identity Server with Kong API Gateway on GKE](https://curity.io/resources/learn/kubernetes-gke-idsvr-kong-phantom) article.
+For a detailed step by step installation instructions, please refer to [Installing the Curity Identity Server with Kong/Nginx on GKE](https://curity.io/resources/learn/kubernetes-gke-idsvr-kong-phantom) article.
 
 
 ## More Information

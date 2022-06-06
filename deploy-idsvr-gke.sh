@@ -23,11 +23,10 @@ greeting_message() {
   echo "| [1] GKE PRIVATE KUBERNETES CLUSTER                                         |"
   echo "| [2] CURITY IDENTITY SERVER ADMIN NODE                                      |"
   echo "| [3] CURITY IDENTITY SERVER RUNTIME NODE                                    |"
-  echo "| [4] NGINX INGRESS CONTROLLER                                               |"
+  echo "| [4] KONG INGRESS CONTROLLER OR NGINX INGRESS CONTROLLER                    |"
   echo "| [5] GCP HTTPS LOAD BALANCER                                                |"
-  echo "| [6] KONG API GATEWAY (OS)                                                  |"
-  echo "| [7] PHANTOM TOKEN PLUGIN                                                   |"
-  echo "| [8] SIMPLE NODEJS API                                                      |"
+  echo "| [6] PHANTOM TOKEN PLUGIN                                                   |"
+  echo "| [7] SIMPLE NODEJS API                                                      |"
   echo "|----------------------------------------------------------------------------|" 
   echo -e "\n"
 }
@@ -80,6 +79,21 @@ create_gke_cluster() {
   read -p "Do you want to create a new private GKE cluster for deploying Curity Identity server ? [Y/y N/n] :" -n 1 -r
   echo -e "\n"
 
+  if [[ ! $REPLY =~ ^[YyNn]$ ]] 
+  then 
+      echo 'Please choose either of [Y/y N/n]' 
+      exit 1
+  fi 
+
+  read -p "Do you want to deploy Kong Ingress controller or Nginx Ingress controller ? [type kong or nginx] :" -r ingress_controller_type 
+  echo -e "\n"
+
+  if [ "$ingress_controller_type" != "kong" ] && [ "$ingress_controller_type" != "nginx" ]
+  then 
+      echo 'Please choose either kong or nginx as the ingress controller' 
+      exit 1
+  fi 
+
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     generate_self_signed_certificates
@@ -115,19 +129,6 @@ generate_self_signed_certificates() {
 }
 
 
-deploy_ingress_controller() {
-  echo -e "Deploying Nginx ingress controller in the k8s cluster ...\n"
-  
-  # create secrets for TLS termination
-  kubectl create secret tls example-gke-tls --cert=certs/example.gke.ssl.pem --key=certs/example.gke.ssl.key -n "$idsvr_namespace" || true
-   
-  # Deploy nginx ingress controller  
-  helm upgrade --install ingress-nginx ingress-nginx \
-    --repo https://kubernetes.github.io/ingress-nginx \
-    --namespace ingress-nginx --create-namespace
-  echo -e "\n"
-}
-
 
 deploy_idsvr() {
   echo "Fetching Curity Idsvr helm chart ..."
@@ -140,7 +141,16 @@ deploy_idsvr() {
   helm install curity curity/idsvr --values idsvr-config/helm-values.yaml --namespace "${idsvr_namespace}" --create-namespace
 
   kubectl create secret generic idsvr-config --from-file=idsvr-config/idsvr-cluster-config.xml --from-file=idsvr-config/license.json -n "${idsvr_namespace}" || true
-
+  
+  # create secrets for TLS termination at ingress layer
+  kubectl create secret tls example-gke-tls --cert=certs/example.gke.ssl.pem --key=certs/example.gke.ssl.key -n "$idsvr_namespace"
+  
+  if [ "$ingress_controller_type" == "kong" ]; then
+    # Patch ingress to add kong ingress class and remove nginx
+    kubectl patch ingress curity-idsvr-ingress -p '{"spec":{"ingressClassName":"kong"}}}' --namespace "${idsvr_namespace}"
+    kubectl patch ingress curity-idsvr-ingress -p '{"metadata":{"annotations":{"kubernetes.io/ingress.class":null }}}' --namespace "${idsvr_namespace}"  
+  fi
+  
   # Copy the deployed artifacts to idsvr-config/template directory for reviewing 
   mkdir -p idsvr-config/templates
   helm template curity curity/idsvr --values idsvr-config/helm-values.yaml > idsvr-config/templates/deployed-idsvr-helm.yaml
@@ -148,23 +158,39 @@ deploy_idsvr() {
 }
 
 
-deploy_kong_gateway() {
-  echo -e "Deploying kong gateway in the k8s cluster ...\n"
+deploy_ingress_controller_and_sample_api() {
+  echo "Deploying $ingress_controller_type ingress controller & sample API"
+  if [ "$ingress_controller_type" == "kong" ]; then
+      deploy_kong_ingress_controller
+      deploy_simple_echo_api
+  else
+      deploy_simple_echo_api
+      deploy_nginx_ingress_controller 
+  fi
 
+}
+
+
+deploy_kong_ingress_controller() {
+  echo -e "Deploying kong ingress controller & adding phantom token plugin in the k8s cluster ...\n"
   helm repo add kong https://charts.konghq.com
   helm repo update
 
-  envsubst < kong-config/kong.yml.template > kong-config/kong.yml
+  # Deploy kong ingress controller
+  envsubst < kong-config/kong-phantom-token-plugin-crd.yaml.template > kong-config/kong-phantom-token-plugin-crd.yaml
+  helm install kong  kong/kong --values kong-config/helm-values.yaml --namespace "${kong_ingress_namespace}" --create-namespace
+  echo -e "\n"
+}
 
-  helm install kong  kong/kong --values kong-config/helm-values.yaml --namespace "${kong_namespace}" --create-namespace
-  
-  kubectl -n "${kong_namespace}" create cm kong-declarative-config --from-file=kong-config/kong.yml
-  
-  # create secrets for TLS termination, ingress setup
-  kubectl create secret tls example-gke-tls --cert=certs/example.gke.ssl.pem --key=certs/example.gke.ssl.key -n "$kong_namespace"
 
-  kubectl  apply -f kong-config/ingress-admin-api.yaml -n "${kong_namespace}"
-  kubectl  apply -f kong-config/ingress-proxy-api.yaml -n "${kong_namespace}"
+deploy_nginx_ingress_controller() {
+  echo -e "Deploying Nginx ingress controller & adding phantom token plugin in the k8s cluster ...\n"
+    
+  # Deploy nginx ingress controller  
+  helm upgrade --install ingress-nginx ingress-nginx \
+     --values nginx-config/helm-values.yaml \
+    --repo https://kubernetes.github.io/ingress-nginx \
+    --namespace "${nginx_ingress_namespace}" --create-namespace
   echo -e "\n"
 }
 
@@ -172,6 +198,18 @@ deploy_kong_gateway() {
 deploy_simple_echo_api() {
   echo -e "Deploying simple echo api in the k8s cluster ...\n"
   kubectl create namespace "$api_namespace" || true
+
+ # create secrets for TLS termination at ingress layer
+  kubectl create secret tls example-gke-tls --cert=certs/example.gke.ssl.pem --key=certs/example.gke.ssl.key -n "$api_namespace"
+  
+  if [ "$ingress_controller_type" == "kong" ]; then
+    # Deploy phantom token plugin in api namespace
+    kubectl apply -f kong-config/kong-phantom-token-plugin-crd.yaml -n "${api_namespace}"
+    kubectl apply -f simple-echo-api-config/echo-api-ingress-kong.yaml -n "${api_namespace}"   
+  else
+      kubectl apply -f simple-echo-api-config/echo-api-ingress-nginx.yaml -n "${api_namespace}"
+  fi
+    
   kubectl apply -f simple-echo-api-config/simple-echo-api-k8s-deployment.yaml -n "${api_namespace}"
   echo -e "\n"
 }
@@ -192,10 +230,10 @@ shutdown_environment() {
 delete_vpc_network() {
   echo "Deleting VPC network resources .."
   echo -e "\n"
-  gcloud compute networks subnets delete curity-subnet --region "${region}"
-  gcloud compute routers delete curity-nat-router --region="${region}"
-  gcloud compute firewall-rules delete curity-ingress-webhook
-  gcloud compute networks delete curity-network
+  gcloud compute networks subnets delete curity-subnet --region "${region}" || true
+  gcloud compute routers delete curity-nat-router --region="${region}" || true
+  gcloud compute firewall-rules delete curity-ingress-webhook || true
+  gcloud compute networks delete curity-network || true
   echo "Clean up completed .."
 }
 
@@ -207,11 +245,12 @@ tear_down_environment() {
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     helm uninstall curity -n "${idsvr_namespace}" || true
-    helm uninstall ingress-nginx -n ingress-nginx || true
-    helm uninstall kong -n "${kong_namespace}" || true
+    helm uninstall kong -n "${kong_ingress_namespace}" || true
+    helm uninstall ingress-nginx -n "${nginx_ingress_namespace}" || true
+
     kubectl delete -f simple-echo-api-config/simple-echo-api-k8s-deployment.yaml -n "${api_namespace}" || true
 
-    gcloud container clusters delete "${cluster_name}" --region "${region}"
+    gcloud container clusters delete "${cluster_name}" --region "${region}" || true
     echo -e "\n" 
     delete_vpc_network
   else
@@ -225,7 +264,12 @@ environment_info() {
   echo "Waiting for LoadBalancer's External IP, sleeping for 60 seconds ..."
   sleep 60
 
-  LB_IP=$(kubectl -n ingress-nginx get svc ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}") || true 
+  if [ "$ingress_controller_type" == "kong" ]; then
+    LB_IP=$(kubectl -n kong get svc kong-kong-proxy -o jsonpath="{.status.loadBalancer.ingress[0].ip}") || true 
+  else
+    LB_IP=$(kubectl -n ingress-nginx get svc ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}") || true  
+  fi
+  
   if [ -z "$LB_IP" ]; then LB_IP="<LoadBalancer-IP>"; fi
   
   echo -e "\n"
@@ -236,14 +280,12 @@ environment_info() {
   echo "|                                                                                                                                                  |"
   echo "| [ADMIN UI]        https://admin.example.gke/admin                                                                                                |"
   echo "| [OIDC METADATA]   https://login.example.gke/~/.well-known/openid-configuration                                                                   |"
-  echo "| [KONG ADMIN API]  https://kong-admin.example.gke                                                                                                 |"
-  echo "| [KONG PROXY API]  https://api.example.gke                                                                                                        |"
   echo "| [SIMPLE ECHO API] https://api.example.gke/echo                                                                                                   |"
   echo "|                                                                                                                                                  |"
   echo "|                                                                                                                                                  |"
   echo "| * Curity administrator username is admin and password is $idsvr_admin_password                                                                    "
   echo "| * Remember to add certs/example.gke.ca.pem to operating system's certificate trust store &                                                       |"
-  echo "|   $LB_IP  admin.example.gke login.example.gke kong-admin.example.gke api.example.gke entry to /etc/hosts                                          "
+  echo "|   $LB_IP  admin.example.gke login.example.gke api.example.gke entry to /etc/hosts                                          "
   echo "|--------------------------------------------------------------------------------------------------------------------------------------------------|" 
 }
 
@@ -259,9 +301,7 @@ case $1 in
     read_cluster_config_file
     create_gke_cluster
     deploy_idsvr
-    deploy_kong_gateway
-    deploy_ingress_controller
-    deploy_simple_echo_api 
+    deploy_ingress_controller_and_sample_api
     environment_info
     ;;
   --start)

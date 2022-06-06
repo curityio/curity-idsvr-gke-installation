@@ -65,9 +65,16 @@
   ],
   "kong-config": [
     {
-      "Name": "kong_namespace",
+      "Name": "kong_ingress_namespace",
       "Value": "kong",
-      "Description": "Name of the k8s namespace to deploy kong gateway"
+      "Description": "Name of the k8s namespace to deploy kong ingress controller"
+    }    
+  ],
+  "nginx-config": [
+    {
+      "Name": "nginx_ingress_namespace",
+      "Value": "ingress-nginx",
+      "Description": "Name of the k8s namespace to deploy kubernetes nginx ingress controller"
     }    
   ],
   "simple-api-config": [

@@ -1,0 +1,11 @@
+controller:
+  name: controller
+  image:
+    repository: curity/nginx-ingress-controller-custom
+    tag: "v1.2.0"
+    pullPolicy: IfNotPresent
+    digest: sha256:7b9e63abd198822f5cfd454250cdf117d27b625bfe4cc7e777304feb06af3d29
+  
+  config: 
+    main-snippet: load_module /usr/lib/nginx/modules/ngx_curity_http_phantom_token_module.so;
+    http-snippet: proxy_cache_path cache levels=1:2 keys_zone=api_cache:10m max_size=10g inactive=60m use_temp_path=off;

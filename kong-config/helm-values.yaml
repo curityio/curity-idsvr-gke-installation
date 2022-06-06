@@ -10,22 +10,25 @@ image:
   repository: curity/kong-custom
   tag: "2.8.1-alpine"
 
-dblessConfig:
-  configMap: kong-declarative-config
-
-
-admin:   # set enabled to true for creating a Kubernetes service for the admin API
+proxy:
   enabled: true
-  type: ClusterIP
-
-proxy: # set enabled to true for creating a Kubernetes service for the proxy API
-  enabled: true
-  type: ClusterIP
+  type: LoadBalancer
 
 ingressController:
-  enabled: false
+  enabled: true
   installCRDs: false
+  ingressClass: kong
+  ingressClassAnnotations: {}
+  rbac:
+    create: true
+
+# Temporary workaround: disable HTTP2 on admin endpoint
+# https://github.com/Kong/kubernetes-ingress-controller/issues/2435
+admin:
+  tls:
+    parameters: []
 
 env:
   database: "off"
-  plugins: 'bundled,phantom-token'
+  LOG_LEVEL: "error"
+  plugins: 'bundled,phantom-token' 

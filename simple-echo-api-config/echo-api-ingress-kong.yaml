@@ -4,25 +4,25 @@ items:
   kind: Ingress
   metadata:
     annotations:
-      kubernetes.io/ingress.class: nginx
-      nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-    name: kong-admin-ingress
-    namespace: kong
+      konghq.com/plugins: phantom-token
+    name: echo-api-ingress
+    namespace: api
   spec:
+    ingressClassName: kong
     rules:
-    - host: kong-admin.example.gke
+    - host: api.example.gke
       http:
         paths:
         - backend:
             service:
-              name: kong-kong-admin
+              name: simple-echo-api-service
               port:
-                name: kong-admin-tls
+                name: http-port
           path: /
           pathType: ImplementationSpecific
     tls:
     - hosts:
-      - kong-admin.example.gke
+      - api.example.gke
       secretName: example-gke-tls
 kind: List
 metadata:
